@@ -40,16 +40,23 @@ export default function LoginPage() {
       // App.tsx handles redirect
     } catch (err: any) {
       console.error('Auth Error Details:', err);
-      if (err.code === 'auth/user-cancelled' || err.code === 'auth/popup-closed-by-user') {
+      const errorCode = err.code || 'unknown';
+      const errorMessage = err.message || '';
+
+      if (errorCode === 'auth/user-cancelled' || errorCode === 'auth/popup-closed-by-user') {
         setError('Login cancelled. Please try again.');
-      } else if (err.code === 'auth/popup-blocked') {
+      } else if (errorCode === 'auth/popup-blocked') {
         setError('Popup blocked by browser. Please allow popups or open the app in a new tab.');
-      } else if (err.code === 'auth/network-request-failed') {
+      } else if (errorCode === 'auth/network-request-failed') {
         setError('Network error. Please check your internet connection or VPN settings.');
-      } else if (err.code === 'auth/internal-error') {
+      } else if (errorCode === 'auth/internal-error') {
         setError('Firebase internal error. Try clearing browser cache and cookies.');
+      } else if (errorCode === 'auth/unauthorized-domain') {
+        setError(`Unauthorized Domain: ${window.location.hostname} is not whitelisted in Firebase Console.`);
+      } else if (errorCode === 'auth/operation-not-allowed') {
+        setError('Google Authentication is not enabled in your Firebase Project.');
       } else {
-        setError(`Auth Error: ${err.message || 'Authentication failed. Please use a different browser or tab.'}`);
+        setError(`Auth Error (${errorCode}): ${errorMessage || 'Authentication failed. Please use a different browser or tab.'}`);
       }
     } finally {
       setLoading(false);
@@ -94,31 +101,38 @@ export default function LoginPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-4"
               >
-                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] py-3 px-4 rounded-xl font-mono leading-relaxed">
-                  <span className="font-bold block mb-1 uppercase tracking-widest">{error?.startsWith('Auth Error') ? 'TRANSMISSION ERROR' : 'SYSTEM STATUS'}</span>
-                  {error}
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] py-3 px-4 rounded-xl font-mono leading-relaxed text-left">
+                  <span className="font-bold block mb-1 uppercase tracking-widest text-red-400">
+                    {error?.includes('Auth Error') ? 'TRANSMISSION_ERROR' : 'AUTH_FAILURE_REPORT'}
+                  </span>
+                  <p className="opacity-90">{error}</p>
                 </div>
                 
                 {window.self !== window.top && (
-                  <div className="space-y-2">
-                    <p className="text-[10px] text-gray-500 font-medium uppercase tracking-tighter text-center">
-                      Detected restricted environment. Attempting secondary bypass...
-                    </p>
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center space-x-2 justify-center">
+                      <div className="h-[1px] flex-1 bg-white/5" />
+                      <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Protocol Override</p>
+                      <div className="h-[1px] flex-1 bg-white/5" />
+                    </div>
                     <button 
                       onClick={() => {
                         try {
                           const newWindow = window.open(window.location.href, '_blank');
                           if (!newWindow) {
-                            setError('Popup was blocked by your browser. Please allow popups and try again.');
+                            setError('Popup blocked. Click "Launch in New Tab" manually in your browser bar.');
                           }
                         } catch (e) {
-                          setError('Failed to open new tab. Please manually copy the URL to a new browser tab.');
+                          setError('Automatic redirection failed. Please use a standalone browser window.');
                         }
                       }}
-                      className="w-full bg-ff-orange/20 hover:bg-ff-orange/30 text-ff-orange text-[10px] font-black py-3 rounded-lg border border-ff-orange/20 uppercase tracking-widest transition-all"
+                      className="w-full bg-ff-orange/20 hover:bg-ff-orange/30 text-ff-orange text-[10px] font-black py-3 rounded-lg border border-ff-orange/20 uppercase tracking-widest transition-all shadow-lg shadow-ff-orange/5"
                     >
-                      Bypass Restrictions (Open New Tab)
+                      Bypass Iframe Restrictions
                     </button>
+                    <p className="text-[8px] text-gray-600 font-mono text-center px-4 leading-tight">
+                      Auth popups are often restricted within iframes. Opening in a new tab resolves most identity verification issues.
+                    </p>
                   </div>
                 )}
               </motion.div>
