@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "Listing": {
+      "title": "FF ID Listing",
+      "description": "Free Fire ID available for purchase",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the listing" },
+        "price": { "type": "number", "description": "The selling price in local currency" },
+        "description": { "type": "string", "description": "Detailed account description" },
+        "imageUrl": { "type": "string", "description": "URL to the primary showcase photo" },
+        "features": { "type": "array", "description": "Specific rare bundles, skins, or stats" },
+        "status": { "type": "string", "enum": ["available", "sold"], "description": "Current status of the ID" },
+        "sellerId": { "type": "string", "description": "UID of the administrator who posted it" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the listing was created" }
+      },
+      "required": ["title", "price", "description", "imageUrl", "features", "status", "sellerId", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User account information including balance",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "balance": { "type": "number", "default": 0 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "balance", "updatedAt"]
+    },
+    "Deposit": {
+      "title": "Deposit Request",
+      "description": "User request to add funds to their wallet",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "amount": { "type": "number" },
+        "transactionId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userEmail", "amount", "transactionId", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "listings/{listingId}": {
+      "schema": "Listing",
+      "description": "Store all available and sold Free Fire items"
+    },
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Store user specific data like balance"
+    },
+    "deposits/{depositId}": {
+      "schema": "Deposit",
+      "description": "Log of all deposit requests"
+    },
+    "admins/{adminId}": {
+      "schema": {
+        "title": "Admin Permission",
+        "description": "Indicator of administrative access",
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      },
+      "description": "Whitelist of administrator UIDs"
+    }
+  }
+}

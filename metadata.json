@@ -1,0 +1,6 @@
+{
+  "name": "FF VAULT",
+  "description": "Premium Marketplace for Free Fire IDs",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
