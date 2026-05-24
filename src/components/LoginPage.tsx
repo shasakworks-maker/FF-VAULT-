@@ -94,16 +94,33 @@ export default function LoginPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-4"
               >
-                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs py-3 px-4 rounded-xl">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] py-3 px-4 rounded-xl font-mono leading-relaxed">
+                  <span className="font-bold block mb-1 uppercase tracking-widest">{error?.startsWith('Auth Error') ? 'TRANSMISSION ERROR' : 'SYSTEM STATUS'}</span>
                   {error}
                 </div>
                 
-                <button 
-                  onClick={() => window.open(window.location.href, '_blank')}
-                  className="w-full bg-white/5 hover:bg-white/10 text-white/70 text-[10px] font-black py-2 rounded-lg border border-white/5 uppercase tracking-widest transition-all"
-                >
-                  Launch Protocol in New Tab
-                </button>
+                {window.self !== window.top && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-gray-500 font-medium uppercase tracking-tighter text-center">
+                      Detected restricted environment. Attempting secondary bypass...
+                    </p>
+                    <button 
+                      onClick={() => {
+                        try {
+                          const newWindow = window.open(window.location.href, '_blank');
+                          if (!newWindow) {
+                            setError('Popup was blocked by your browser. Please allow popups and try again.');
+                          }
+                        } catch (e) {
+                          setError('Failed to open new tab. Please manually copy the URL to a new browser tab.');
+                        }
+                      }}
+                      className="w-full bg-ff-orange/20 hover:bg-ff-orange/30 text-ff-orange text-[10px] font-black py-3 rounded-lg border border-ff-orange/20 uppercase tracking-widest transition-all"
+                    >
+                      Bypass Restrictions (Open New Tab)
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
             

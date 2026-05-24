@@ -41,10 +41,13 @@ export default function App() {
 
     // Safety timeout: if auth takes longer than 10 seconds, stop loading
     const authTimeout = setTimeout(() => {
-      if (loading) {
-        console.warn('Auth state check timed out');
-        setLoading(false);
-      }
+      setLoading(currentLoading => {
+        if (currentLoading) {
+          console.warn('Auth state check timed out');
+          return false;
+        }
+        return currentLoading;
+      });
     }, 10000);
     
     return () => {
