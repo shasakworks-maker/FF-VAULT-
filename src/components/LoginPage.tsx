@@ -52,7 +52,7 @@ export default function LoginPage() {
       } else if (errorCode === 'auth/internal-error') {
         setError('Firebase internal error. Try clearing browser cache and cookies.');
       } else if (errorCode === 'auth/unauthorized-domain') {
-        setError(`Unauthorized Domain: ${window.location.hostname} is not whitelisted in Firebase Console.`);
+        setError(`UNAUTHORIZED_DOMAIN: ${window.location.hostname} is not whitelisted in Firebase Console. Please add it to your Authorized Domains.`);
       } else if (errorCode === 'auth/operation-not-allowed') {
         setError('Google Authentication is not enabled in your Firebase Project.');
       } else {
