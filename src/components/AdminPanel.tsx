@@ -40,7 +40,7 @@ import {
   getDoc
 } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
-import { db, auth, handleFirestoreError, storage } from '../lib/firebase';
+import { db, auth, handleFirestoreError, storage, isUserAdmin } from '../lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Listing, ListingStatus, Deposit, DepositStatus, UserProfile, AppSettings } from '../types';
 import logo from '../assets/images/ff_vault_logo_1779359542950.png';

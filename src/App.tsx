@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from './lib/firebase';
+import { auth, isUserAdmin, ensureUserProfile } from './lib/firebase';
 import LoginPage from './components/LoginPage';
 import AdminPanel from './components/AdminPanel';
 import WalletPage from './components/WalletPage';
@@ -29,10 +29,12 @@ export default function App() {
       setShowSplash(false);
     }, 2500);
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        setIsAdmin(currentUser.email === 'ashokpal76199@gmail.com');
+        setIsAdmin(isUserAdmin(currentUser));
+        // Background ensure profile
+        ensureUserProfile(currentUser).catch(console.error);
       } else {
         setIsAdmin(false);
       }

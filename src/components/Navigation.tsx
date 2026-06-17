@@ -15,24 +15,17 @@ import {
   User
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
-import { auth, db } from '../lib/firebase';
+import { auth, db, isUserAdmin } from '../lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import logo from '../assets/images/ff_vault_logo_1779359542950.png';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+  const isAdmin = isUserAdmin(auth.currentUser);
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (auth.currentUser) {
-        setIsAdmin(auth.currentUser.email === 'ashokpal76199@gmail.com');
-      }
-    };
-    checkAdmin();
-
     if (auth.currentUser) {
       const q = query(
         collection(db, 'notifications'),

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { motion } from 'motion/react';
 import { LogIn, Eye, EyeOff, ShieldCheck, Mail } from 'lucide-react';
-import { signInWithGoogle } from '../lib/firebase';
+import { signInWithGoogle, isUserAdmin } from '../lib/firebase';
 import logo from '../assets/images/ff_vault_logo_1779359542950.png';
 
 export default function LoginPage() {
@@ -20,23 +20,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const user = await signInWithGoogle();
-      
-      // Initialize profile if it doesn't exist
-      if (user) {
-        const { doc, getDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
-        const { db } = await import('../lib/firebase');
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            email: user.email || '',
-            balance: 0,
-            updatedAt: serverTimestamp()
-          });
-        }
-      }
+      await signInWithGoogle();
       // App.tsx handles redirect
     } catch (err: any) {
       console.error('Auth Error Details:', err);
@@ -52,7 +36,8 @@ export default function LoginPage() {
       } else if (errorCode === 'auth/internal-error') {
         setError('Firebase internal error. Try clearing browser cache and cookies.');
       } else if (errorCode === 'auth/unauthorized-domain') {
-        setError(`UNAUTHORIZED_DOMAIN: ${window.location.hostname} is not whitelisted in Firebase Console. Please add it to your Authorized Domains.`);
+        const domain = window.location.hostname;
+        setError(`UNAUTHORIZED_DOMAIN: "${domain}" is not whitelisted in Firebase Console. You must add this domain to Authentication > Settings > Authorized Domains in your Firebase project.`);
       } else if (errorCode === 'auth/operation-not-allowed') {
         setError('Google Authentication is not enabled in your Firebase Project.');
       } else {

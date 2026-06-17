@@ -20,7 +20,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { collection, query, where, orderBy, getDocs, onSnapshot, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
-import { db, auth } from '../lib/firebase';
+import { db, auth, isUserAdmin } from '../lib/firebase';
 import { Listing, ListingStatus, UserProfile } from '../types';
 
 function ImageSlider({ images, title, className = "h-56", children }: { images: string[], title: string, className?: string, children?: React.ReactNode }) {

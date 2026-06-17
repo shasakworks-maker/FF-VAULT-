@@ -24,9 +24,34 @@ export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
+// Centralized Admin Email
+export const ADMIN_EMAIL = 'ashokpal76199@gmail.com';
+
+export function isUserAdmin(user: { email?: string | null } | null) {
+  return user?.email === ADMIN_EMAIL;
+}
+
+export async function ensureUserProfile(user: { uid: string, email: string | null }) {
+  if (!user) return;
+  const { doc, getDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
+  const userRef = doc(db, 'users', user.uid);
+  const userSnap = await getDoc(userRef);
+  
+  if (!userSnap.exists()) {
+    await setDoc(userRef, {
+      email: user.email || '',
+      balance: 0,
+      updatedAt: serverTimestamp()
+    });
+  }
+}
+
 export async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth, googleProvider);
+    if (result.user) {
+      await ensureUserProfile(result.user);
+    }
     return result.user;
   } catch (error) {
     console.error('Login Error:', error);

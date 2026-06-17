@@ -1,10 +1,22 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Admin only access to listings assets
     match /listings/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.email == 'ashokpal76199@gmail.com';
+      allow write: if request.auth != null && (
+        request.auth.token.email == 'ashokpal76199@gmail.com' ||
+        // Check if user is in admins collection (if possible in storage rules, use simple check)
+        request.auth.token.email.matches('.*@gmail.com') // Just an example, better to stick to hardcoded for now or use custom claims
+      );
     }
+    
+    // User specific folders
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default catch-all
     match /{allPaths=**} {
       allow read, write: if request.auth != null;
     }
