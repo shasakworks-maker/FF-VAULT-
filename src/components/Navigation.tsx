@@ -15,7 +15,7 @@ import {
   User
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
-import { auth, db, isUserAdmin } from '../lib/firebase';
+import { auth, db, isUserAdmin, fromAuthEmail } from '../lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import logo from '../assets/images/ff_vault_logo_1779359542950.png';
 
@@ -40,7 +40,9 @@ export default function Navigation() {
   }, []);
 
   const handleLogout = async () => {
+    localStorage.removeItem('ff_vault_fallback_user');
     await signOut(auth);
+    window.dispatchEvent(new Event('ff_vault_auth_change'));
     navigate('/login');
   };
 
@@ -76,7 +78,7 @@ export default function Navigation() {
             onClick={() => navigate('/profile')}
             className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-ff-orange hover:bg-ff-orange hover:text-white transition-all overflow-hidden"
           >
-            {auth.currentUser?.email?.[0].toUpperCase()}
+            {fromAuthEmail(auth.currentUser?.email || '')?.[0]?.toUpperCase() || 'U'}
           </button>
           <button onClick={() => setIsOpen(!isOpen)} className="text-gray-400 hover:text-white p-1">
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -170,10 +172,10 @@ export default function Navigation() {
           >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl font-bold text-ff-orange group-hover:bg-ff-orange group-hover:text-white transition-all">
-                {auth.currentUser?.email?.[0].toUpperCase()}
+                {fromAuthEmail(auth.currentUser?.email || '')?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white truncate group-hover:text-ff-orange transition-colors">{auth.currentUser?.email}</p>
+                <p className="text-xs font-bold text-white truncate group-hover:text-ff-orange transition-colors">{fromAuthEmail(auth.currentUser?.email || '')}</p>
                 <p className="text-[10px] text-gray-500 font-mono italic">SECURE_AUTH</p>
               </div>
               <button 

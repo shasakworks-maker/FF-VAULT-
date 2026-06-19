@@ -27,6 +27,18 @@
       },
       "required": ["email", "balance", "updatedAt"]
     },
+    "Credentials": {
+      "title": "Credentials",
+      "description": "Secure hashed credentials for internal authentication verification",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "hashedPassword": { "type": "string" },
+        "resetOtp": { "type": "string" },
+        "resetOtpExpiry": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "hashedPassword"]
+    },
     "Deposit": {
       "title": "Deposit Request",
       "description": "User request to add funds to their wallet",
@@ -50,6 +62,10 @@
     "users/{userId}": {
       "schema": "UserProfile",
       "description": "Store user specific data like balance"
+    },
+    "user_passwords/{email}": {
+      "schema": "Credentials",
+      "description": "Secure hashed credentials for internal authentication verification"
     },
     "deposits/{depositId}": {
       "schema": "Deposit",

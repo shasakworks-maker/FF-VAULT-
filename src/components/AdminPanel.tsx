@@ -47,21 +47,35 @@ import logo from '../assets/images/ff_vault_logo_1779359542950.png';
 
 function ImageSlider({ images, title, className = "h-56" }: { images: string[], title: string, className?: string }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // -1 for left, 1 for right
   const imagesList = (images || []).filter(url => typeof url === 'string' && url.trim() !== '');
 
   useEffect(() => {
     setCurrentImageIndex(0);
+    setDirection(0);
   }, [images]);
+
+  // Preload all listing images for instant slider interaction
+  useEffect(() => {
+    if (imagesList.length > 1) {
+      imagesList.forEach((url) => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+  }, [imagesList]);
 
   const nextImage = (e?: MouseEvent | React.MouseEvent) => {
     if (e && 'stopPropagation' in e) e.stopPropagation();
     if (imagesList.length <= 1) return;
+    setDirection(1);
     setCurrentImageIndex((prev) => (prev + 1) % imagesList.length);
   };
 
   const prevImage = (e?: MouseEvent | React.MouseEvent) => {
     if (e && 'stopPropagation' in e) e.stopPropagation();
     if (imagesList.length <= 1) return;
+    setDirection(-1);
     setCurrentImageIndex((prev) => (prev - 1 + imagesList.length) % imagesList.length);
   };
 
@@ -75,16 +89,16 @@ function ImageSlider({ images, title, className = "h-56" }: { images: string[], 
 
   return (
     <div className={`${className} relative overflow-hidden bg-black/40 group/slider touch-pan-y`}>
-      <AnimatePresence initial={false} mode="wait">
+      <AnimatePresence initial={false}>
         <motion.img 
           key={currentImageIndex}
           src={imagesList[currentImageIndex]} 
           alt={`${title} - ${currentImageIndex + 1}`} 
           referrerPolicy="no-referrer"
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: direction === 0 ? 0 : direction * 150 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, x: direction === 0 ? 0 : -direction * 150 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
@@ -544,7 +558,11 @@ export default function AdminPanel() {
         </div>
         
         <button 
-          onClick={() => signOut(auth)}
+          onClick={async () => {
+            localStorage.removeItem('ff_vault_fallback_user');
+            await signOut(auth);
+            window.dispatchEvent(new Event('ff_vault_auth_change'));
+          }}
           className="p-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white"
         >
           <LogOut className="w-5 h-5" />

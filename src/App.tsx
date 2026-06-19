@@ -4,10 +4,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth, isUserAdmin, ensureUserProfile } from './lib/firebase';
+import { User } from 'firebase/auth';
+import { auth, isUserAdmin, ensureUserProfile, onAuthStateChanged } from './lib/firebase';
 import LoginPage from './components/LoginPage';
 import AdminPanel from './components/AdminPanel';
 import WalletPage from './components/WalletPage';
@@ -27,7 +27,7 @@ export default function App() {
   useEffect(() => {
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 2500);
+    }, 1000);
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);

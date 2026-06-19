@@ -13,7 +13,7 @@ import {
   Bell,
   CreditCard
 } from 'lucide-react';
-import { auth, db } from '../lib/firebase';
+import { auth, db, fromAuthEmail } from '../lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
 interface UserData {
@@ -119,20 +119,20 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8 relative z-10">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-3xl bg-ff-orange flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-ff-orange/20 border-4 border-white/10 italic">
-              {auth.currentUser?.email?.[0].toUpperCase()}
+            <div className="relative">
+              <div className="w-24 h-24 rounded-3xl bg-ff-orange flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-ff-orange/20 border-4 border-white/10 italic">
+                {fromAuthEmail(auth.currentUser?.email || '')?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <div className="absolute -bottom-2 -right-2 bg-green-500 w-8 h-8 rounded-2xl border-4 border-[#0a0a0b] flex items-center justify-center">
+                <Shield className="w-3.5 h-3.5 text-white" />
+              </div>
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-green-500 w-8 h-8 rounded-2xl border-4 border-[#0a0a0b] flex items-center justify-center">
-              <Shield className="w-3.5 h-3.5 text-white" />
-            </div>
-          </div>
 
-          <div className="flex-1 space-y-2">
-            <div className="flex items-center space-x-3">
-              <h1 className="text-3xl font-black tracking-tighter text-white italic">
-                {auth.currentUser?.email?.split('@')[0].toUpperCase()}
-              </h1>
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center space-x-3">
+                <h1 className="text-3xl font-black tracking-tighter text-white italic">
+                  {fromAuthEmail(auth.currentUser?.email || '')?.split('@')[0]?.toUpperCase() || 'AGENT'}
+                </h1>
               <span className="bg-white/5 px-3 py-1 rounded-full text-[10px] font-black text-ff-orange uppercase tracking-widest border border-white/5">
                 Verified Asset Agent
               </span>
@@ -140,7 +140,7 @@ export default function ProfilePage() {
             <div className="flex flex-wrap gap-4 text-sm text-gray-400 font-medium">
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-ff-orange/70" />
-                <span>{auth.currentUser?.email}</span>
+                <span>{fromAuthEmail(auth.currentUser?.email || '')}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="w-4 h-4 text-ff-orange/70" />
@@ -176,7 +176,7 @@ export default function ProfilePage() {
               {[
                 { label: 'Security Level', value: '4 (Max)', icon: Shield },
                 { label: 'Wallet ID', value: auth.currentUser?.uid.slice(0, 12) + '...', icon: CreditCard },
-                { label: 'Login Method', value: 'Google Secure', icon: Bell },
+                { label: 'Login Method', value: 'Email / Password', icon: Bell },
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors group cursor-default">
                   <div className="flex items-center space-x-3 text-gray-400">

@@ -20,26 +20,40 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { collection, query, where, orderBy, getDocs, onSnapshot, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
-import { db, auth, isUserAdmin } from '../lib/firebase';
+import { db, auth, isUserAdmin, fromAuthEmail } from '../lib/firebase';
 import { Listing, ListingStatus, UserProfile } from '../types';
 
 function ImageSlider({ images, title, className = "h-56", children }: { images: string[], title: string, className?: string, children?: React.ReactNode }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // -1 for left, 1 for right
   const imagesList = (images || []).filter(url => typeof url === 'string' && url.trim() !== '');
 
   useEffect(() => {
     setCurrentImageIndex(0);
+    setDirection(0);
   }, [images]);
+
+  // Preload all listing images for instant slider interaction
+  useEffect(() => {
+    if (imagesList.length > 1) {
+      imagesList.forEach((url) => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+  }, [imagesList]);
 
   const nextImage = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (imagesList.length === 0) return;
+    setDirection(1);
     setCurrentImageIndex((prev) => (prev + 1) % imagesList.length);
   };
 
   const prevImage = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (imagesList.length === 0) return;
+    setDirection(-1);
     setCurrentImageIndex((prev) => (prev - 1 + imagesList.length) % imagesList.length);
   };
 
@@ -54,16 +68,16 @@ function ImageSlider({ images, title, className = "h-56", children }: { images: 
 
   return (
     <div className={`${className} relative overflow-hidden bg-black/40 group/slider touch-pan-y`}>
-      <AnimatePresence initial={false} mode="wait">
+      <AnimatePresence initial={false}>
         <motion.img 
           key={currentImageIndex}
           src={imagesList[currentImageIndex]} 
           alt={`${title} - ${currentImageIndex + 1}`} 
           referrerPolicy="no-referrer"
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: direction === 0 ? 0 : direction * 150 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, x: direction === 0 ? 0 : -direction * 150 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
@@ -318,7 +332,7 @@ export default function Marketplace() {
         const purchaseLogRef = doc(collection(db, 'purchases'));
         transaction.set(purchaseLogRef, {
           userId: auth.currentUser!.uid,
-          userEmail: auth.currentUser!.email,
+          userEmail: fromAuthEmail(auth.currentUser!.email || ''),
           listingId: selectedListing.id,
           listingTitle: selectedListing.title,
           amount: selectedListing.price,

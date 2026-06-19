@@ -27,7 +27,7 @@ import {
   onSnapshot,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db, auth, handleFirestoreError } from '../lib/firebase';
+import { db, auth, handleFirestoreError, fromAuthEmail } from '../lib/firebase';
 import { UserProfile, Deposit, DepositStatus, AppSettings } from '../types';
 import logo from '../assets/images/ff_vault_logo_1779359542950.png';
 
@@ -54,7 +54,7 @@ export default function WalletPage() {
       } else {
         // Initialize profile if it doesn't exist
         const newProfile = {
-          email: auth.currentUser?.email || '',
+          email: fromAuthEmail(auth.currentUser?.email || ''),
           balance: 0,
           updatedAt: serverTimestamp()
         };
@@ -106,7 +106,7 @@ export default function WalletPage() {
     try {
       const depositData: Omit<Deposit, 'id'> = {
         userId: auth.currentUser.uid,
-        userEmail: auth.currentUser.email || '',
+        userEmail: fromAuthEmail(auth.currentUser.email || ''),
         amount: Number(amount),
         transactionId: transactionId,
         status: DepositStatus.PENDING,
